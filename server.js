@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
 const app = express();
-
+const session = require('express-session');
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const morgan = require("morgan");
@@ -21,15 +21,29 @@ mongoose.connection.on("connected", () => {
 app.use(express.urlencoded({ extended: false }));
 // Middleware for using HTTP verbs such as PUT or DELETE
 app.use(methodOverride("_method"));
+
 // Morgan for logging HTTP requests
 app.use(morgan('dev'));
 
+app.use(methodOverride("_method"));
+app.use(morgan('dev'));
+// new
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 // server.js
 
-// GET /
-app.get("/", async (req, res) => {
-    res.render("index.ejs");
-});
+app.get("/", (req, res) => {
+    res.render("index.ejs", {
+      user: req.session.user,
+    });
+  });
+  
   
 
 app.listen(port, () => {
